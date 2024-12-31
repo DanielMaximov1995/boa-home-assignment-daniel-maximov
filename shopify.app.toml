@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "35bc78159acaf1d6304229c3e9656355"
+application_url = "https://charlie-buys-brilliant-window.trycloudflare.com"
+embedded = true
+name = "boa-home-task-DM"
+handle = "boa-home-task-dm"
+
+[build]
+include_config_on_deploy = true
+dev_store_url = "home-assignment-231.myshopify.com"
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2024-10"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers"
+
+[auth]
+redirect_urls = [
+  "https://charlie-buys-brilliant-window.trycloudflare.com/auth/callback",
+  "https://charlie-buys-brilliant-window.trycloudflare.com/auth/shopify/callback",
+  "https://charlie-buys-brilliant-window.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false

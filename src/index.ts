@@ -5,6 +5,7 @@ import serveStatic from "serve-static";
 import dotenv from "dotenv";
 
 import shopify from "./shopify.js";
+import cartRouter from './routes/cart.js';
 
 dotenv.config();
 
@@ -14,7 +15,6 @@ const PORT = parseInt(backendPort || envPort, 10);
 
 const app = express();
 
-// Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
   shopify.config.auth.callbackPath,
@@ -22,19 +22,18 @@ app.get(
   shopify.redirectToShopifyOrAppRoot()
 );
 
-app.post(
-  shopify.config.webhooks.path,
-  shopify.processWebhooks({ webhookHandlers: {} })
-);
+app.post(shopify.config.webhooks.path, shopify.processWebhooks({ webhookHandlers: {} }));
 
 app.use(express.json());
 
-// All endpoints after this point will require an active session
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.use(serveStatic(`${process.cwd()}/frontend/`, { index: false }));
 
+app.use('/proxy', cartRouter);
+
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
+
   const htmlContent = readFileSync(
     join(`${process.cwd()}/frontend/`, "index.html"),
     "utf-8"
@@ -43,6 +42,7 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
     /%SHOPIFY_API_KEY%/g,
     process.env.SHOPIFY_API_KEY || ""
   );
+
 
   res.status(200).set("Content-Type", "text/html").send(transformedHtml);
 });
