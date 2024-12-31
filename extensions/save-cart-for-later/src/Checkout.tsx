@@ -12,7 +12,7 @@ import {
   useCustomer
 } from "@shopify/ui-extensions-react/checkout";
 import { CartLineChange } from "@shopify/ui-extensions/checkout";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default reactExtension("purchase.checkout.block.render", () => (
   <Extension />
@@ -26,10 +26,7 @@ function Extension() {
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
   const customer = useCustomer();
-
-  console.log(customer);
   
-
   const handleCheckboxChange = (id: string) => {
     setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
     setError("")
@@ -76,6 +73,10 @@ function Extension() {
         body: JSON.stringify({ items: selectedItems })
       });
 
+      const data = await response.json()
+      console.log(data);
+      
+
       if (!response.ok) {
         console.error('Failed to save items for later on the server.');
       }
@@ -90,9 +91,10 @@ function Extension() {
     <BlockStack
       spacing="loose"
       background="subdued"
-      borderRadius="loose"
+      borderRadius="small"
       padding="loose"
       accessibilityRole="section"
+      border='base'
     >
       <Text size="extraLarge" appearance="info" emphasis="bold">
             Save your cart for later
