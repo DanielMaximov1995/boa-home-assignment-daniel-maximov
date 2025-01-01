@@ -3,6 +3,7 @@ import express from "express";
 import { readFileSync } from "fs";
 import serveStatic from "serve-static";
 import dotenv from "dotenv";
+import cors from 'cors'
 
 import shopify from "./shopify.js";
 import cartRouter from './routes/cart.js';
@@ -23,6 +24,10 @@ app.get(
 );
 
 app.post(shopify.config.webhooks.path, shopify.processWebhooks({ webhookHandlers: {} }));
+
+app.use(cors({
+  origin : "*"
+}));
 
 app.use(express.json());
 
@@ -47,4 +52,6 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
   res.status(200).set("Content-Type", "text/html").send(transformedHtml);
 });
 
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

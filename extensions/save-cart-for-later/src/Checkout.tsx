@@ -26,7 +26,7 @@ function Extension() {
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
   const customer = useCustomer();
-  
+
   const handleCheckboxChange = (id: string) => {
     setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
     setError("")
@@ -55,50 +55,52 @@ function Extension() {
       }
     });
 
-    for (const change of changes.filter(change => change !== undefined)) {
-      const result = await applyCartLinesChange(change);
-      if (result.type !== 'success') {
-        setError('Failed to save items for later. Please try again.');
-        return;
-      }
-    }
-    setSuccess('Selected items have been saved for later.');
 
     try {
-      const response = await fetch('/proxy/save-cart', {
+      const response = await fetch(`${this.location.origin}/proxy/save-cart`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ items: selectedItems })
+        body: JSON.stringify({ items: selectedItems , customerId : customer.id })
       });
 
-      const data = await response.json()
-      console.log(data);
-      
-
       if (!response.ok) {
-        console.error('Failed to save items for later on the server.');
+        const errorData = await response.text();
+        throw new Error(errorData);
       }
+
+      for (const change of changes.filter(change => change !== undefined)) {
+        const result = await applyCartLinesChange(change);
+        if (result.type !== 'success') {
+          setError('Failed to save items for later. Please try again.');
+          return;
+        }
+      }
+      setSuccess('Selected items have been saved for later.');
     } catch (error) {
       console.error('Error saving items for later:', error);
+      setError('Failed to save items for later. Please try again.');
     } finally {
       setLoading(false)
     }
   };
-
+  
   return (
     <BlockStack
+    accessibilityRole="section"
+    >
+      <Text size="extraLarge" appearance="info" emphasis="bold">
+            Save your cart for later
+          </Text>
+      <BlockStack
       spacing="loose"
       background="subdued"
       borderRadius="small"
       padding="loose"
       accessibilityRole="section"
       border='base'
-    >
-      <Text size="extraLarge" appearance="info" emphasis="bold">
-            Save your cart for later
-          </Text>
+      >
       {customer?.id ? ( 
         <>
           {cartLines.length > 0 ? (
@@ -129,6 +131,7 @@ function Extension() {
           To save your cart for later, please log in.
         </Text>
       )}
+      </BlockStack>
     </BlockStack>
   );
 }
